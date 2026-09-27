@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+app/report/
+app/forecast_data.json
+*.inspect.ndjson
+archive/
+dist/
+_site/
+AI-First-Repository-Data-Hygiene.md
+.env
+.env.*
+!.env.example

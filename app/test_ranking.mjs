@@ -40,6 +40,7 @@ const nodes=new Map();const get=id=>{if(!nodes.has(id))nodes.set(id,{value:'',in
 get('dataset').textContent=JSON.stringify(data);get('start').value='1';get('level').value='group';get('threshold').value='100000';
 const ui=vm.createContext({document:{getElementById:get,querySelectorAll:()=>[]},setTimeout,console});
 vm.runInContext(html.match(/<\/script><script>([\s\S]*?)<\/script>/)[1],ui);
+assert.match(get('detail').innerHTML,/<details id="detailFilterDisclosure" class="detail-filters" open>/);
 vm.runInContext('detail(ranked.find(r=>r.combinedCount))',ui);
 assert.ok(get('detail').innerHTML.includes('<h2>Other expenses</h2>'));
 assert.ok(get('detail').innerHTML.includes('Account groups'));
@@ -115,4 +116,34 @@ assert.deepEqual(new Set(choiceValues(3)),new Set(data.rows.filter(r=>r['Cost Ce
 assert.equal(get('rankingTotal').innerHTML,rankBefore);
 get('detailReset').onclick();assert.deepEqual(new Set(choiceValues(3)),new Set(data.rows.map(r=>r['Budget ID'])));
 console.log('Cascading filter tests passed: regular account-group drilldown, exact group/account/ID options, cost-center scoping, stale selection clearing and reset.');
+
+// Disclosure state must be independent of the filters and supporting results.
+get('detailFilter1').onchange({target:{value:'G03'}});
+assert.ok(get('detail').innerHTML.includes('Account group: G03'));
+const filtersBeforeCollapse=vm.runInContext('JSON.stringify(detailFilters)',ui);
+const detailBeforeCollapse=get('detail').innerHTML;
+const rankingBeforeCollapse=get('rankingTotal').innerHTML;
+const disclosure=get('detailFilterDisclosure');
+disclosure.open=false;disclosure.ontoggle({currentTarget:disclosure});
+assert.equal(vm.runInContext('detailFiltersOpen',ui),false);
+assert.equal(vm.runInContext('JSON.stringify(detailFilters)',ui),filtersBeforeCollapse);
+assert.equal(get('detail').innerHTML,detailBeforeCollapse);
+assert.equal(get('rankingTotal').innerHTML,rankingBeforeCollapse);
+vm.runInContext('detail(selected,true)',ui);
+assert.match(get('detail').innerHTML,/<details id="detailFilterDisclosure" class="detail-filters">/);
+assert.equal(vm.runInContext('JSON.stringify(detailFilters)',ui),filtersBeforeCollapse);
+assert.ok(get('detail').innerHTML.indexOf('</details>')<get('detail').innerHTML.indexOf('Measured contributions'));
+assert.ok(get('detail').innerHTML.includes('Account group: G03'));
+get('detailReset').onclick();
+assert.match(get('detail').innerHTML,/<details id="detailFilterDisclosure" class="detail-filters">/);
+assert.ok(get('detail').innerHTML.includes('class="detail-filter-summary">All included</span>'));
+get('reset').onclick();
+assert.match(get('detail').innerHTML,/<details id="detailFilterDisclosure" class="detail-filters">/);
+disclosure.open=true;disclosure.ontoggle({currentTarget:disclosure});
+vm.runInContext('detail(selected,true)',ui);
+assert.match(get('detail').innerHTML,/<details id="detailFilterDisclosure" class="detail-filters" open>/);
+// A toggle queued by a removed disclosure must not change the current state.
+disclosure.ontoggle({currentTarget:{open:false}});
+assert.equal(vm.runInContext('detailFiltersOpen',ui),true);
+console.log('Disclosure tests passed: expanded default, active summary, collapse preserves filters/results, persistent state across rerenders/reset and stale toggle isolation.');
 

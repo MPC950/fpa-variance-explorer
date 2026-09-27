@@ -13,3 +13,5 @@
 - Use Claude for design elements and UI design. Have Claude produce mockups for the user to review before implementing design changes in the app.
 - Keep proposed designs separate from the working app until the user approves the mockups. After approval, implement the approved design and run the relevant checks.
 - If Claude is unavailable, explain the limitation and ask the user how to proceed with design work. Do not silently substitute another model for Claude.
+- Use Claude only through the user's existing Pro subscription and its included usage. Do not use API billing, paid extra usage, credits, token purchases, upgrades, or other additional charges. Stop if included usage is exhausted or the billing route cannot be verified.
+- The user confirmed Usage credits / Extra usage is off on September 27, 2026. Keep it off; do not enable paid fallback. Verify subscription authentication before delegated Claude runs.

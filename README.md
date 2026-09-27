@@ -5,7 +5,9 @@
 - **Open report.cmd** opens the existing interactive report in your browser.
 - **Run analysis.cmd** regenerates the report from the workbook and opens it.
 - [App instructions](app/README.md) explain Python setup, comparisons, filters and tests.
-- [GitHub and Pages setup](GITHUB.md) describes the prepared, manual publication workflow.
+- Repository: [MPC950/fpa-variance-explorer](https://github.com/MPC950/fpa-variance-explorer).
+- Live report: [Open FP&A variance explorer](https://mpc950.github.io/fpa-variance-explorer/) on desktop or phone.
+- [GitHub and Pages instructions](GITHUB.md) explain how to publish updates.
 
 ## Project layout and ownership
 

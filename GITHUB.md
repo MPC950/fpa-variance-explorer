@@ -1,8 +1,10 @@
-# GitHub repository and Pages setup
+# GitHub repository and Pages
 
-Prepared locally. No repository or published website has been created.
+Repository: [MPC950/fpa-variance-explorer](https://github.com/MPC950/fpa-variance-explorer)
 
-Suggested repository name: `fpa-variance-explorer`.
+Live report: [Open FP&A variance explorer](https://mpc950.github.io/fpa-variance-explorer/).
+The first deployment passed on September 27, 2026. The public report and period
+filters were verified after deployment.
 
 The repository holds the Python app, template, tests, and synthetic workbook.
 Pages serves the generated interactive report. Viewers can use its filters on
@@ -19,26 +21,14 @@ committing or publishing it.
 Generated reports, archives, ZIPs, local environment files, and the supplied
 data-hygiene reference are excluded by `.gitignore`. The reference stays on disk.
 
-## When publication is authorized
+## Publish an update
 
-1. In GitHub Desktop, use **File > Add local repository**, choose `C:\FPA Python`,
-   and use the option to create a repository here if prompted. Keep the repository
-   root at `C:\FPA Python` rather than making a nested project folder.
-2. Review the changed-file list. Commit the app, synthetic workbook, tests, scripts,
-   documentation, `.gitignore`, and `.github/workflows/pages.yml`.
-3. Publish the repository to the chosen GitHub account as `fpa-variance-explorer`.
-   A public repository supports Pages on GitHub Free. Private repository Pages
-   depends on your plan; a private source repository does not by itself make the
-   Pages website private.
-4. On GitHub, open **Settings > Pages** and select **GitHub Actions** as the source.
-5. Open **Actions > Publish FP&A report > Run workflow** on the default branch.
-   Tests must pass before deployment. The workflow runs only when manually started.
-6. Copy the deployed URL from the workflow or Pages settings. Normally it is
-   `https://YOUR-USERNAME.github.io/fpa-variance-explorer/`.
+1. In GitHub Desktop, review and commit the intended project changes, then push them.
+2. On GitHub, open **Actions > Publish FP&A report > Run workflow** and start it
+   from the default branch. The workflow runs tests before building and deploying.
+3. Check the run completes successfully, then open the Pages address above.
 
-For updates, commit and push changes, then manually run the workflow again.
-GitHub Desktop handles the Git sign-in; a separate command-line sign-in is not
-required for these steps.
+The workflow starts only when manually run. GitHub Desktop handles Git sign-in.
 
 ## Local verification
 

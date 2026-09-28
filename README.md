@@ -26,6 +26,12 @@ The current input workbook and app source are authoritative. Reports and ZIP pac
 
 The migration manifest records every transferred file's original path, destination, size and SHA256 hash at transfer. External shared runtime dependencies were not copied. Python and Node remain installed dependencies, not part of this project.
 
+## Source control and recovery
+
+Structural project files are retained in GitHub: source code, templates, scripts, tests, dependency and deployment configuration, project instructions, and reference documents, including [the data-hygiene reference](AI-First-Repository-Data-Hygiene.md). Future reusable design sources and approved mockups should live outside ignored archive/output folders and be committed with the related work.
+
+Generated reports and CSV outputs do not need to be retained in Git; regenerate them from the tracked source and input workbook. Caches, diagnostics, historical archives, and distribution ZIPs also remain excluded. Never commit secrets or real financial data without explicit authorization.
+
 ## Verification
 
 From the `app` folder, using an environment with `requirements.txt` installed:

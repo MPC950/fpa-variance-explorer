@@ -4,6 +4,7 @@
 - Edit `app/report_template.html`, then regenerate the HTML with `app/analyze.py`; avoid edits solely to the generated report.
 - The workbook in `app/` is the current input. `archive/` contains historical artifacts, not alternate editable masters.
 - Preserve the user-supplied data-hygiene reference. Apply its guidance selectively; keep changes proportional.
+- Track all structural project files in Git, including source, templates, scripts, tests, dependency and deployment configuration, project instructions, and reference documents. Keep reusable design sources and approved mockups outside ignored output/archive folders. Commit and push these files with completed changes so they are available on another computer.
 - After changes, run the relevant analysis or report tests. Package updates with `scripts/package.py` when updating the downloadable app.
 - Generated reports, caches, diagnostics and distribution ZIPs are excluded from source control. Never put real financial data or secrets in version control without explicit authorization.
 

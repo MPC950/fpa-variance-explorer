@@ -36,7 +36,7 @@ for(const key of ['Cost Center ID','Account Group ID','Account ID','Budget ID'])
 assert.equal(filterDetailRows(other.rows,{'Budget ID':'not-in-other'}).length,0);
 assert.equal(sum(other.rows).actual,original.actual);
 // Exercise actual UI handlers in a minimal DOM fixture, without controlling a browser.
-const nodes=new Map();const get=id=>{if(!nodes.has(id))nodes.set(id,{value:'',innerHTML:'',textContent:'',onclick:null,onchange:null});return nodes.get(id);};
+const nodes=new Map();const get=id=>{if(!nodes.has(id))nodes.set(id,{value:'',innerHTML:'',textContent:'',onclick:null,onchange:null,attributes:{},setAttribute(key,value){this.attributes[key]=value;}});return nodes.get(id);};
 get('dataset').textContent=JSON.stringify(data);get('start').value='1';get('level').value='group';get('threshold').value='100000';
 const ui=vm.createContext({document:{getElementById:get,querySelectorAll:()=>[]},setTimeout,console});
 vm.runInContext(html.match(/<\/script><script>([\s\S]*?)<\/script>/)[1],ui);
@@ -146,4 +146,50 @@ assert.match(get('detail').innerHTML,/<details id="detailFilterDisclosure" class
 disclosure.ontoggle({currentTarget:{open:false}});
 assert.equal(vm.runInContext('detailFiltersOpen',ui),true);
 console.log('Disclosure tests passed: expanded default, active summary, collapse preserves filters/results, persistent state across rerenders/reset and stale toggle isolation.');
+
+
+// Approved display precision, monetary boundaries and negative zero.
+const displayCases=[
+ [12.49,'$12','$0.0K','$0.0M'],[987.65,'$988','$1.0K','$0.0M'],
+ [1234.56,'$1,235','$1.2K','$0.0M'],[12560,'$12,560','$12.6K','$0.0M'],
+ [125600,'$125,600','$125.6K','$0.1M'],[987650,'$987,650','$987.7K','$1.0M'],
+ [1550000,'$1,550,000','$1,550.0K','$1.6M'],[12560000,'$12,560,000','$12,560.0K','$12.6M'],
+ [125600000,'$125,600,000','$125,600.0K','$125.6M'],[3000000000,'$3,000,000,000','$3,000,000.0K','$3,000.0M'],
+ [-1234.5,'-$1,235','-$1.2K','$0.0M'],[-0.49,'$0','$0.0K','$0.0M'],[-50000,'-$50,000','-$50.0K','-$0.1M']];
+for(const [value,...expected] of displayCases)for(const [i,mode] of ['dollars','thousands','millions'].entries())assert.equal(ui.formatAmount(value,mode),expected[i]);
+assert.equal(ui.formatAmount(-0),'$0');
+// The bridge must reconcile start plus signed contributions to its endpoint in every comparison.
+for(const mode of ['budget','forecast','both','forecast_budget'])for(const scenario of ['FQ1','FQ2','FQ3']){
+ get('comparisonMode').value=mode;get('forecastScenario').value=scenario;get('comparisonMode').onchange();
+ const totals=vm.runInContext('sum(current)',ui),steps=ui.bridgeSteps(totals);
+ assert.ok(Math.abs(steps.slice(0,-1).reduce((a,x)=>a+x.value,0)-steps.at(-1).value)<.005);
+ assert.equal(steps[0].label,mode==='forecast'?ui.forecastLabel():'Budget');
+ assert.equal(steps.at(-1).label,mode==='forecast_budget'?ui.forecastLabel():'Actual');
+ assert.equal(steps.slice(1,-1).every(x=>x.delta),true);
+ assert.ok(get('bridge').innerHTML.includes('class="bridge-steps"'));
+ assert.ok(get('detail').innerHTML.includes('class="bridge-steps"'));
+ if(mode==='both')assert.ok(get('bridge').innerHTML.includes('minus '+ui.forecastLabel()+' vs Budget'));
+}
+// Display buttons preserve selected Other row, all detail filters, disclosure, raw threshold and CSV values.
+get('reset').onclick();get('threshold').value='100000';get('threshold').oninput();
+vm.runInContext('detail(ranked.find(r=>r.combinedCount))',ui);
+get('detailFilter0').onchange({target:{value:vm.runInContext('selected.rows[0]["Cost Center ID"]',ui)}});
+get('detailFilter1').onchange({target:{value:vm.runInContext('filterDetailRows(selected.rows,detailFilters)[0]["Account Group ID"]',ui)}});
+const displayDisclosure=get('detailFilterDisclosure');displayDisclosure.open=false;displayDisclosure.ontoggle({currentTarget:displayDisclosure});
+const stateBeforeDisplay=vm.runInContext('JSON.stringify({key:selected.key,filters:detailFilters,open:detailFiltersOpen,totals:sum(current)})',ui);
+get('export').onclick();const rawExport=vm.runInContext('JSON.stringify(exported)',ui);
+get('txexport').onclick();const rawTransactions=vm.runInContext('JSON.stringify(exported)',ui);
+for(const [mode,id] of [['thousands','amountThousands'],['millions','amountMillions'],['dollars','amountDollars']]){
+ get(id).onclick();assert.equal(get(id).attributes['aria-pressed'],'true');
+ assert.equal(vm.runInContext('amountDisplay',ui),mode);
+ assert.equal(vm.runInContext('JSON.stringify({key:selected.key,filters:detailFilters,open:detailFiltersOpen,totals:sum(current)})',ui),stateBeforeDisplay);
+ assert.equal(get('threshold').value,'100000');
+ assert.match(get('detail').innerHTML,/<details id="detailFilterDisclosure" class="detail-filters">/);
+ get('export').onclick();assert.equal(vm.runInContext('JSON.stringify(exported)',ui),rawExport);
+ get('txexport').onclick();assert.equal(vm.runInContext('JSON.stringify(exported)',ui),rawTransactions);
+ assert.ok(get('cards').innerHTML.includes(vm.runInContext('cash(sum(current).actual)',ui)));
+ assert.ok(get('amountDisplayNote').textContent.includes('full USD precision'));
+}
+assert.ok(!html.includes('data-raw=')); // The mockup sample amounts are not shipped.
+console.log('Amount/bridge tests passed: 13 signed examples across all scales, 12 reconciled bridges, accessible buttons, preserved selection/filter/disclosure, and unchanged full-precision exports.');
 

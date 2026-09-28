@@ -65,6 +65,12 @@ The original workbook is never modified. The script overwrites files in the sele
 - Explanations use Register, Budget, Actuals and Forecasts. The Scenario Guide is used solely by the test suite to check planted outcomes.
 - Budget and actual amounts are original inputs. The report is a snapshot; rerun to reflect edits. Group labels must agree across source sheets and the register.
 
+## Amount display
+
+Use **Dollars**, **Thousands**, or **Millions** to change monetary displays throughout the report. Dollars use standard whole-dollar rounding; thousands and millions show one decimal with K or M. For example, $125,600 displays as $125.6K or $0.1M. Small amounts can display as zero in scaled views.
+
+The variance threshold remains in dollars. Calculations and CSV exports retain full-precision USD amounts, so rounded rows may not sum exactly to the displayed total. Bridge cards show the starting amount, signed changes, and ending amount; arrows indicate the direction of reconciliation.
+
 ## Supported input contract
 
 This version is tailored to the supplied 2026 USD workbook, including the Account Group fields. It requires a unique register, all 12 budget months per ID (including explicit zero budgets), one budget line per ID/month, unique transaction IDs, and consistent dimensions. Schema/data errors stop generation rather than produce misleading results. Future-year or multi-currency workbooks require an extension.
